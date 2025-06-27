@@ -10,6 +10,7 @@ import TimeRangeSelector from './components/TimeRangeSelector';
 import AchievementBadges from './components/AchievementBadges';
 import StatisticsDashboard from './components/StatisticsDashboard';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const [habits, setHabits] = useState([]); // State to hold the list of habits
@@ -181,7 +182,7 @@ function App() {
       return row;
     });
 
-    return { data: heatmapData, dates: dates.map(date => date.slice(5)) }; // Return data and shortened dates
+    return { data: heatmapData, dates: dates }; // Return full dates instead of shortened ones
   };
 
   const calculateStreak = (habit) => {
@@ -398,122 +399,159 @@ function App() {
   const trendChartData = useMemo(() => generateTrendChartData(habits, selectedTimeRange), [habits, selectedTimeRange]); // Generate trend chart data
   const pieChartData = useMemo(() => generatePieChartData(habits, selectedTimeRange), [habits, selectedTimeRange]); // Generate pie chart data
 
+  const pageVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
+
+  const cardVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    hover: { y: -5, transition: { duration: 0.2 } }
+  };
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-4xl font-bold text-center mb-8 text-gray-800 dark:text-white">
-            Habit Tracker
-          </h1>
-          
-          {/* Notification Permission Button */}
-          <div className="flex justify-center mb-8">
-            <button
-              onClick={requestNotificationPermission}
-              className="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-full transition-colors duration-200 flex items-center space-x-2"
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
+        <div className="absolute inset-0 z-0 opacity-20 dark:opacity-10">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M0 0h40v40H0z" fill="none"/>
+                <circle cx="20" cy="20" r="2" fill="currentColor" className="text-gray-900 dark:text-gray-200"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#pattern)"/>
+          </svg>
+        </div>
+
+        <div className="relative z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex justify-between items-center mb-8"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-              <span>Enable Notifications</span>
-            </button>
-          </div>
+              <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500">
+                Habit Tracker
+              </h1>
+              <TimeRangeSelector
+                selectedTimeRange={selectedTimeRange}
+                onTimeRangeChange={setSelectedTimeRange}
+              />
+            </motion.div>
 
-          {/* Navigation Tabs */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-white dark:bg-gray-800 rounded-full shadow-md p-1">
-              <button
-                onClick={() => setActiveTab('habits')}
-                className={`px-6 py-2 rounded-full transition-colors duration-200 ${
-                  activeTab === 'habits'
-                    ? 'bg-primary-500 text-white'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                Habits
-              </button>
-              <button
-                onClick={() => setActiveTab('statistics')}
-                className={`px-6 py-2 rounded-full transition-colors duration-200 ${
-                  activeTab === 'statistics'
-                    ? 'bg-primary-500 text-white'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                }`}
-              >
-                Statistics
-              </button>
+            <div className="mb-8">
+              <nav className="flex space-x-4 bg-white dark:bg-gray-800 p-2 rounded-lg shadow-sm">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setActiveTab('habits')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    activeTab === 'habits'
+                      ? 'bg-blue-500 text-white'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  Habits
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setActiveTab('statistics')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    activeTab === 'statistics'
+                      ? 'bg-blue-500 text-white'
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+                  }`}
+                >
+                  Statistics
+                </motion.button>
+              </nav>
             </div>
-          </div>
 
-          {/* Time Range Selector */}
-          <TimeRangeSelector
-            selectedTimeRange={selectedTimeRange}
-            onTimeRangeChange={setSelectedTimeRange}
-          />
-          
-          {activeTab === 'habits' ? (
-            <div className="grid gap-8 grid-cols-1 lg:grid-cols-2">
-              <div className="space-y-8">
-                <HabitForm
-                  onAddHabit={addHabit}
-                  editingHabit={editingHabit}
-                  onEditHabitSubmit={handleEditHabitSubmit}
-                />
-                <HabitList
-                  habits={habits}
-                  onToggleComplete={toggleHabitComplete}
-                  onDeleteHabit={deleteHabit}
-                  onEditHabit={startEditing}
-                />
-                <AchievementBadges habits={habits} />
-              </div>
-              
-              <div className="space-y-8">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                  <HabitHeatmap
-                    data={generateHeatmapData(habits, selectedTimeRange).data}
-                    dates={generateHeatmapData(habits, selectedTimeRange).dates}
-                    habitLabels={habits.map(h => h.name)}
-                  />
-                </div>
-                
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                  <HabitCompletionChart
-                    data={generateChartData(habits, selectedTimeRange)}
-                  />
-                </div>
-                
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                  <HabitTrendChart
-                    data={generateTrendChartData(habits, selectedTimeRange)}
-                  />
-                </div>
-                
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-                  <HabitPieChart
-                    data={generatePieChartData(habits, selectedTimeRange)}
-                  />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <StatisticsDashboard
-              habits={habits}
-              selectedTimeRange={selectedTimeRange}
-            />
-          )}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === 'habits' ? (
+                  <div className="grid gap-8 grid-cols-1 lg:grid-cols-2">
+                    <div className="space-y-8">
+                      <motion.div variants={cardVariants} whileHover="hover">
+                        <HabitForm
+                          onAddHabit={addHabit}
+                          editingHabit={editingHabit}
+                          onEditHabitSubmit={handleEditHabitSubmit}
+                        />
+                      </motion.div>
+                      <motion.div variants={cardVariants} whileHover="hover">
+                        <HabitList
+                          habits={habits}
+                          onToggleComplete={toggleHabitComplete}
+                          onDeleteHabit={deleteHabit}
+                          onEditHabit={startEditing}
+                        />
+                      </motion.div>
+                      <motion.div variants={cardVariants} whileHover="hover">
+                        <AchievementBadges habits={habits} />
+                      </motion.div>
+                    </div>
+                    
+                    <div className="space-y-8">
+                      <motion.div
+                        variants={cardVariants}
+                        whileHover="hover"
+                        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform transition-all duration-200"
+                      >
+                        <HabitHeatmap
+                          data={heatmapData.data}
+                          dates={heatmapData.dates}
+                          habitLabels={habits.map(h => h.name)}
+                        />
+                      </motion.div>
+                      
+                      <motion.div
+                        variants={cardVariants}
+                        whileHover="hover"
+                        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform transition-all duration-200"
+                      >
+                        <HabitCompletionChart data={chartData} />
+                      </motion.div>
+                      
+                      <motion.div
+                        variants={cardVariants}
+                        whileHover="hover"
+                        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform transition-all duration-200"
+                      >
+                        <HabitTrendChart data={trendChartData} />
+                      </motion.div>
+                      
+                      <motion.div
+                        variants={cardVariants}
+                        whileHover="hover"
+                        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform transition-all duration-200"
+                      >
+                        <HabitPieChart data={pieChartData} />
+                      </motion.div>
+                    </div>
+                  </div>
+                ) : (
+                  <motion.div variants={cardVariants} whileHover="hover">
+                    <StatisticsDashboard
+                      habits={habits}
+                      selectedTimeRange={selectedTimeRange}
+                    />
+                  </motion.div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
         <ThemeToggle />
       </div>

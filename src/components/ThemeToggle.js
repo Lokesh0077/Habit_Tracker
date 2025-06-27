@@ -1,47 +1,33 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { SunIcon as SunIconSolid, MoonIcon as MoonIconSolid } from '@heroicons/react/24/solid';
 import { useTheme } from '../contexts/ThemeContext';
 
 const ThemeToggle = () => {
-  const { darkMode, toggleDarkMode } = useTheme();
+  const { theme, toggleTheme } = useTheme();
 
   return (
-    <button
-      onClick={toggleDarkMode}
-      className="fixed bottom-4 right-4 p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white shadow-lg hover:shadow-xl transition-all duration-300"
-      title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+    <motion.button
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.9 }}
+      onClick={toggleTheme}
+      className="fixed bottom-6 right-6 p-3 rounded-full shadow-lg bg-white dark:bg-gray-800 text-yellow-500 dark:text-blue-400"
     >
-      {darkMode ? (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-          />
-        </svg>
-      ) : (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-          />
-        </svg>
-      )}
-    </button>
+      <motion.div
+        initial={false}
+        animate={{ rotate: theme === 'dark' ? 180 : 0 }}
+        transition={{ type: "spring", stiffness: 200, damping: 10 }}
+      >
+        {theme === 'dark' ? (
+          <MoonIconSolid className="w-6 h-6" />
+        ) : (
+          <SunIconSolid className="w-6 h-6" />
+        )}
+      </motion.div>
+    </motion.button>
   );
 };
 

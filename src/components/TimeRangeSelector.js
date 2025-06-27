@@ -1,33 +1,44 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { CalendarIcon as CalendarIconSolid } from '@heroicons/react/24/solid';
 
 const TimeRangeSelector = ({ selectedTimeRange, onTimeRangeChange }) => {
   const timeRanges = [
-    { value: '7days', label: 'Last 7 Days' },
-    { value: '30days', label: 'Last 30 Days' },
-    { value: 'oneyear', label: 'Last Year' },
+    { id: '7days', label: '7 Days' },
+    { id: '30days', label: '30 Days' },
+    { id: 'oneyear', label: '1 Year' }
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-8">
-      <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
-        Time Range
-      </h3>
-      <div className="flex flex-wrap gap-2">
-        {timeRanges.map(({ value, label }) => (
-          <button
-            key={value}
-            onClick={() => onTimeRangeChange(value)}
+    <div className="relative">
+      <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-1">
+        {timeRanges.map((range) => (
+          <motion.button
+            key={range.id}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onTimeRangeChange(range.id)}
             className={`
-              px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200
-              ${
-                selectedTimeRange === value
-                  ? 'bg-primary-500 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+              relative px-4 py-2 rounded-lg font-medium text-sm transition-colors duration-200
+              ${selectedTimeRange === range.id
+                ? 'bg-blue-500 text-white'
+                : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
               }
             `}
           >
-            {label}
-          </button>
+            <span className="flex items-center space-x-1">
+              <CalendarIconSolid className="w-4 h-4" />
+              <span>{range.label}</span>
+            </span>
+            {selectedTimeRange === range.id && (
+              <motion.div
+                layoutId="activeIndicator"
+                className="absolute inset-0 bg-blue-500 rounded-lg -z-10"
+                initial={false}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
+          </motion.button>
         ))}
       </div>
     </div>

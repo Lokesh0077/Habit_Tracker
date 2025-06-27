@@ -1,51 +1,51 @@
 import React from 'react';
-import { HeatmapGrid } from 'react-heatmap-grid';
+import HeatMap from '@uiw/react-heat-map';
 
 const HabitHeatmap = ({ data, dates, habitLabels }) => {
-  // Basic styling for the heatmap container
-  const containerStyle = {
-    width: '100%',
-    overflowX: 'auto', // Add horizontal scroll if needed
-    paddingBottom: '10px', // Add some space for the scrollbar
+  // Transform data into the format required by @uiw/react-heat-map
+  const transformData = () => {
+    const heatmapData = [];
+    data.forEach((habitData, habitIndex) => {
+      habitData.forEach((value, dateIndex) => {
+        if (value === 1) {
+          heatmapData.push({
+            date: dates[dateIndex],
+            count: 1,
+            habit: habitLabels[habitIndex]
+          });
+        }
+      });
+    });
+    return heatmapData;
   };
 
   return (
     <div className="mt-8">
       <h2 className="text-xl font-bold mb-4 text-center">Habit Completion Heatmap</h2>
-      <div style={containerStyle}>
+      <div className="overflow-x-auto">
         {data && data.length > 0 && dates && dates.length > 0 && habitLabels && habitLabels.length > 0 ? (
-          <HeatmapGrid
-            data={data}
-            xLabels={dates}
-            yLabels={habitLabels}
-            // Customize colors and other appearance options here
-            cellRender={(x, y, value) => {
-              const habitName = habitLabels[y]; // Get the habit name using the y-coordinate
-              const date = dates[x]; // Get the date using the x-coordinate
-              const completionStatus = value === 1 ? 'Completed' : 'Not Completed';
-              const tooltipText = `${habitName} on ${date}: ${completionStatus}`;
-
-              return (
-                <div title={tooltipText}>
-                  {/* You can optionally render something inside the cell, like a checkmark or an empty circle */}
-                  {/* {value === 1 ? '✓' : ''} */}
-                </div>
-              );
-            }}
-            cellStyle={(x, y, value) => ({
-              background: value === 1 ? '#4CAF50' : '#EEEEEE', // Green for completed, light gray for not completed
-              // Example with a slightly different completed color:
-              // background: value === 1 ? '#66BB6A' : '#EEEEEE',
-              // Example with more distinction:
-              // background: value === 1 ? '#2E7D32' : '#E0E0E0',
-              borderRadius: '4px',
-              // Example border:
-              // border: '1px solid #CCCCCC',
-            })}
-            cellHeight="25px" // Adjust cell height as needed
-            xLabelsStyle={() => ({ fontSize: '.65rem', textTransform: 'uppercase' })}
-            yLabelsStyle={() => ({ fontSize: '.8rem' })}
-          />
+          <div className="space-y-4">
+            {habitLabels.map((habit, index) => (
+              <div key={habit} className="bg-white p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-2">{habit}</h3>
+                <HeatMap
+                  value={transformData().filter(d => d.habit === habit)}
+                  width={800}
+                  height={100}
+                  rectSize={12}
+                  startDate={new Date(dates[0])}
+                  endDate={new Date(dates[dates.length - 1])}
+                  rectProps={{
+                    rx: 2,
+                  }}
+                  legendRender={rect => null}
+                  rectColor={value => {
+                    return value ? '#4CAF50' : '#EEEEEE';
+                  }}
+                />
+              </div>
+            ))}
+          </div>
         ) : (
           <p className="text-gray-500 text-center">Add some habits and mark them as done to see the heatmap.</p>
         )}
